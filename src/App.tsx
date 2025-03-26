@@ -8,26 +8,31 @@ import Dashboard from './pages/Dashboard';
 import Settings from './pages/Settings';
 import DailyTracking from './pages/DailyTracking';
 import WeeklyTracking from './pages/WeeklyTracking'; // Import the new WeeklyTracking page
+import { ThemeProvider } from '@mui/material/styles';
+import CssBaseline from '@mui/material/CssBaseline';
+import theme from './theme';
 import './App.css';
 
 function App() {
   return (
-    <div className="App">
-      <Provider store={store}>
-        <Router>
-          <Navigation />
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/settings" element={<Settings />} />
-            <Route path="/daily-tracking" element={<DailyTracking />} />
-            <Route path="/weekly-tracking" element={<WeeklyTracking />} /> {/* New Route */}
-          </Routes>
-        </Router>
-      </Provider>
-    </div>
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <div className="App">
+        <Provider store={store}>
+          <Router>
+            <Navigation />
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/settings" element={<Settings />} />
+              <Route path="/daily-tracking" element={<DailyTracking />} />
+              <Route path="/weekly-tracking" element={<WeeklyTracking />} /> {/* New Route */}
+            </Routes>
+          </Router>
+        </Provider>
+      </div>
+    </ThemeProvider>
   );
 }
 
 export default App;
-
