@@ -14,7 +14,13 @@ interface HabitState {
 }
 
 const initialState: HabitState = {
-  habits: [],
+  habits: [
+    { id: '1', name: 'Sleep a solid 7-8 hours', completed: false, date: new Date().toISOString() },
+    { id: '2', name: '30 mins+ of cardio + weights', completed: false, date: new Date().toISOString() },
+    { id: '3', name: 'Drinked at least 30oz of water', completed: false, date: new Date().toISOString() },
+    { id: '4', name: 'Read an article about technology and AI', completed: false, date: new Date().toISOString() },
+    { id: '5', name: 'Took fiber, B12, D supplements', completed: false, date: new Date().toISOString() },
+  ],
 };
 
 const habitSlice = createSlice({
