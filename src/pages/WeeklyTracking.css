@@ -1,0 +1,47 @@
+.weekly-tracking {
+    padding: 20px;
+    font-family: Arial, sans-serif;
+  }
+  
+  h1 {
+    text-align: center;
+    color: #333;
+  }
+  
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+  }
+  
+  th, td {
+    border: 1px solid #ddd;
+    padding: 10px;
+    text-align: center;
+  }
+  
+  th {
+    background-color: #f4f4f4;
+    font-weight: bold;
+  }
+  
+  tr:nth-child(even) {
+    background-color: #f9f9f9;
+  }
+  
+  tr:hover {
+    background-color: #e6f7ff;
+  }
+  
+  input[type="checkbox"] {
+    transform: scale(1.2);
+    cursor: pointer;
+  }
+  
+  input[type="checkbox"]:checked {
+    accent-color: #007bff;
+  }
+  
+  td {
+    vertical-align: middle;
+  }
