@@ -9,12 +9,7 @@ const HabitForm: React.FC = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    dispatch(addHabit({ 
-      id: Date.now().toString(), 
-      name, 
-      completed: false, 
-      date: new Date().toISOString()
-    }));
+    dispatch(addHabit({ name }));
     setName('');
   };
 

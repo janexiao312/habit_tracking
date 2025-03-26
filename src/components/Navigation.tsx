@@ -1,16 +1,18 @@
 import React from 'react';
-import './Navigation.css';
+import { AppBar, Toolbar, Button, Box } from '@mui/material';
+import { Link } from 'react-router-dom';
 
 const Navigation = () => {
   return (
-    <nav>
-      <ul>
-        <li><a href="/">Home</a></li>
-        <li><a href="/daily-tracking">Daily Tracking</a></li>
-        <li><a href="/dashboard">Dashboard</a></li>
-        <li><a href="/settings">Settings</a></li>
-      </ul>
-    </nav>
+    <AppBar position="static">
+      <Toolbar>
+        <Box sx={{ flexGrow: 1, display: 'flex', gap: 2 }}>
+          <Button color="inherit" component={Link} to="/">Home</Button>
+          <Button color="inherit" component={Link} to="/dashboard">Dashboard</Button>
+          <Button color="inherit" component={Link} to="/settings">Settings</Button>
+        </Box>
+      </Toolbar>
+    </AppBar>
   );
 };
 
