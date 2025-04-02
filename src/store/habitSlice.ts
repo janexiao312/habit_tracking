@@ -13,14 +13,17 @@ interface HabitState {
   habits: Habit[];
 }
 
+const loadHabitsFromStorage = (): Habit[] => {
+  const storedHabits = localStorage.getItem('habits');
+  return storedHabits ? JSON.parse(storedHabits) : [];
+};
+
+const saveHabitsToStorage = (habits: Habit[]) => {
+  localStorage.setItem('habits', JSON.stringify(habits));
+};
+
 const initialState: HabitState = {
-  habits: [
-    { id: '1', name: 'Sleep a solid 7-8 hours', completed: false, date: new Date().toISOString() },
-    { id: '2', name: '30 mins+ of cardio + weights', completed: false, date: new Date().toISOString() },
-    { id: '3', name: 'Drinked at least 30oz of water', completed: false, date: new Date().toISOString() },
-    { id: '4', name: 'Read an article about technology and AI', completed: false, date: new Date().toISOString() },
-    { id: '5', name: 'Took fiber, B12, D supplements', completed: false, date: new Date().toISOString() },
-  ],
+  habits: loadHabitsFromStorage(),
 };
 
 const habitSlice = createSlice({
@@ -35,18 +38,22 @@ const habitSlice = createSlice({
         date: new Date().toISOString(),
       };
       state.habits.push(newHabit);
+      saveHabitsToStorage(state.habits);
     },
     reorderHabits: (state, action: PayloadAction<Habit[]>) => {
       state.habits = action.payload;
+      saveHabitsToStorage(state.habits);
     },
     removeHabit: (state, action: PayloadAction<string>) => {
       state.habits = state.habits.filter((habit) => habit.id !== action.payload);
+      saveHabitsToStorage(state.habits);
     },
     toggleHabit: (state, action: PayloadAction<string>) => {
       const habit = state.habits.find((habit) => habit.id === action.payload);
       if (habit) {
         habit.completed = !habit.completed;
       }
+      saveHabitsToStorage(state.habits);
     },
   },
 });

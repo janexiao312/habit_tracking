@@ -1,5 +1,8 @@
 import React, { useState } from 'react';
-import { DragDropContext, Droppable, Draggable, DroppableProvided, DraggableProvided } from 'react-beautiful-dnd';
+import { DndContext, closestCenter } from '@dnd-kit/core';
+import { arrayMove, SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
+import { useSortable } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 import { Container, Paper, Typography, Box, Button, TextField } from '@mui/material';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store';
@@ -22,20 +25,41 @@ const Settings: React.FC = () => {
     dispatch(removeHabit(id));
   };
 
-  const handleDragEnd = (result: any) => {
-    if (!result.destination) return;
+  const handleDragEnd = (event: any) => {
+    const { active, over } = event;
+    if (active.id !== over.id) {
+      const oldIndex = habits.findIndex((habit) => habit.id === active.id);
+      const newIndex = habits.findIndex((habit) => habit.id === over.id);
+      const reorderedHabits = arrayMove(habits, oldIndex, newIndex);
+      dispatch(reorderHabits(reorderedHabits));
+    }
+  };
 
-    const reorderedHabits = Array.from(habits);
-    const [removed] = reorderedHabits.splice(result.source.index, 1);
-    reorderedHabits.splice(result.destination.index, 0, removed);
+  const SortableItem = ({ id, name }: { id: string; name: string }) => {
+    const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id });
+    const style = {
+      transform: CSS.Transform.toString(transform),
+      transition,
+      padding: '8px',
+      margin: '4px 0',
+      backgroundColor: '#f0f0f0',
+      border: '1px solid #ccc',
+      borderRadius: '4px',
+      cursor: 'grab',
+    };
 
-    // Dispatch an action to update the Redux state with the new order
-    // Assuming an action like `reorderHabits` exists in habitSlice
-    dispatch(reorderHabits(reorderedHabits));
+    return (
+      <li ref={setNodeRef} style={style} {...attributes} {...listeners}>
+        {name}
+        <Button variant="text" color="secondary" onClick={() => handleRemoveHabit(id)}>
+          Remove
+        </Button>
+      </li>
+    );
   };
 
   return (
-    <DragDropContext onDragEnd={handleDragEnd}>
+    <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
       <Container>
         <Paper elevation={3} sx={{ padding: 2 }}>
           <Box sx={{ textAlign: 'center', mt: 4 }}>
@@ -59,37 +83,17 @@ const Settings: React.FC = () => {
           </Box>
           <Box sx={{ mt: 4 }}>
             <Typography variant="h6">Current Habits</Typography>
-            <Droppable droppableId="habits" isDropDisabled={false} isCombineEnabled={false} ignoreContainerClipping={false}>
-              {(provided: DroppableProvided) => (
-                <ul {...provided.droppableProps} ref={provided.innerRef}>
-                  {habits.map((habit, index) => (
-                    <Draggable key={habit.id} draggableId={habit.id} index={index}>
-                      {(provided: DraggableProvided) => (
-                        <li
-                          ref={provided.innerRef}
-                          {...provided.draggableProps}
-                          {...provided.dragHandleProps}
-                        >
-                          {habit.name}
-                          <Button
-                            variant="text"
-                            color="secondary"
-                            onClick={() => handleRemoveHabit(habit.id)}
-                          >
-                            Remove
-                          </Button>
-                        </li>
-                      )}
-                    </Draggable>
-                  ))}
-                  {provided.placeholder}
-                </ul>
-              )}
-            </Droppable>
+            <SortableContext items={habits.map((habit) => habit.id)} strategy={verticalListSortingStrategy}>
+              <ul style={{ listStyleType: 'none', padding: 0, margin: 0 }}>
+                {habits.map((habit) => (
+                  <SortableItem key={habit.id} id={habit.id} name={habit.name} />
+                ))}
+              </ul>
+            </SortableContext>
           </Box>
         </Paper>
       </Container>
-    </DragDropContext>
+    </DndContext>
   );
 };
 
