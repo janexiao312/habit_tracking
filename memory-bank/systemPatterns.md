@@ -1,7 +1,7 @@
 # System Patterns
 
 ## System Architecture
-The application follows a modular architecture with a clear separation of concerns between different components. The frontend is built using React with TypeScript, and the UI components are styled using Material-UI (MUI). State management is handled using Redux or Context API, and data visualization is implemented using D3.js or Chart.js. The application integrates with Apple HealthKit API for health data synchronization and uses IndexedDB or localStorage for local data storage.
+The application follows a modular architecture with a clear separation of concerns between different components. The frontend is built using React with TypeScript, and the UI components are styled using Material-UI (MUI). State management is handled using Redux or Context API, and data visualization is implemented using D3.js or Chart.js. The application integrates with Apple HealthKit API for health data synchronization and uses MongoDB for data persistence, with Mongoose as the ODM (Object Document Mapper) and Express.js for the backend API.
 
 ## Key Technical Decisions
 - **React with TypeScript**: Chosen for its strong typing and component-based architecture, which enhances code maintainability and scalability.
@@ -9,7 +9,9 @@ The application follows a modular architecture with a clear separation of concer
 - **Redux or Context API**: Used for state management to ensure a predictable and centralized state across the application.
 - **D3.js or Chart.js**: Utilized for data visualization to create interactive and informative charts.
 - **Apple HealthKit API**: Integrated to automate data collection from health devices and provide a seamless user experience.
-- **IndexedDB or localStorage**: Employed for local data storage to ensure data persistence and offline access.
+- **MongoDB**: Selected for its flexible document model and scalability, making it ideal for storing varied habit tracking data.
+- **Mongoose**: Chosen as the ODM to provide schema validation and type safety when working with MongoDB.
+- **Express.js**: Used to build a RESTful API backend that connects the React frontend with MongoDB.
 
 ## Design Patterns in Use
 - **Component-Based Architecture**: The application is built using reusable and self-contained components, which promotes code reusability and maintainability.

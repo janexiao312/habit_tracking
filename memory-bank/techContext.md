@@ -9,7 +9,8 @@ Development of a personal habit tracking application using React TypeScript and 
 - **State Management**: Redux or Context API
 - **Data Visualization**: D3.js or Chart.js
 - **Health Data Integration**: Apple HealthKit API
-- **Local Storage**: IndexedDB or localStorage
+- **Database**: MongoDB (with Mongoose ODM)
+- **Backend**: Express.js
 - **Data Export**: JSON/CSV export functionality
 
 ## Core Features

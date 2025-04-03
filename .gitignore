@@ -2,8 +2,13 @@
 
 # dependencies
 /node_modules
+/backend/node_modules
 /.pnp
 .pnp.js
+
+# mongodb
+/data/db
+backend/.env
 
 # testing
 /coverage
