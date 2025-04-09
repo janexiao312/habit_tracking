@@ -1,20 +1,26 @@
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import Navigation from './components/Navigation';
-import Home from './pages/Home';
-import Dashboard from './pages/Dashboard';
-import Settings from './pages/Settings';
-import DailyTracking from './pages/DailyTracking';
-import WeeklyTracking from './pages/WeeklyTracking';
-import Login from './pages/Login';
-import Register from './pages/Register';
-import PrivateRoute from './components/PrivateRoute';
 import { ThemeProvider } from '@mui/material/styles';
 import { Box } from '@mui/material';
 import CssBaseline from '@mui/material/CssBaseline';
-import { lightTheme, darkTheme } from './theme';
 import useMediaQuery from '@mui/material/useMediaQuery';
-import './App.css';
+
+// Layout
+import Navigation from './layout/components/Navigation';
+
+// Feature components
+import Home from './features/habits/Home';
+import Dashboard from './features/habits/Dashboard';
+import Settings from './features/habits/Settings';
+import DailyTracking from './features/habits/DailyTracking';
+import WeeklyTracking from './features/habits/WeeklyTracking';
+import Login from './features/auth/Login';
+import Register from './features/auth/Register';
+import PrivateRoute from './features/auth/PrivateRoute';
+
+// Styles
+import { lightTheme, darkTheme } from './shared/styles/theme';
+import './shared/styles/App.css';
 
 function App() {
   const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)');
