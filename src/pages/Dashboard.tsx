@@ -4,28 +4,31 @@ import { Container, Paper, Typography, Box, Grid, Card, CardContent } from '@mui
 import { LocalFireDepartment, TrendingUp, CheckCircle } from '@mui/icons-material';
 import { RootState } from '../store';
 import HabitChart from '../components/HabitChart';
-import { calculateWeeklyStats, calculateCurrentStreak, calculateCompletionRate } from '../utils/habitStats';
+import { calculateDailyStats, calculateStreak, calculateCompletionRate } from '../utils/habitStats';
+import { format } from 'date-fns';
 
 const Dashboard = () => {
   const habits = useSelector((state: RootState) => state.habits.habits);
-  const weeklyStats = calculateWeeklyStats(habits);
-  const currentStreak = calculateCurrentStreak(habits);
+  const dailyStats = calculateDailyStats(habits, 7);
+  const currentStreak = calculateStreak(habits);
   const completionRate = calculateCompletionRate(habits);
 
   const weeklyChartData = {
-    labels: weeklyStats.map(stat => stat.day),
+    labels: dailyStats.map(stat => format(stat.date, 'MMM d')),
     datasets: [
       {
         label: 'Completion Rate',
-        data: weeklyStats.map(stat => stat.percentage),
+        data: dailyStats.map(stat => stat.percentage),
         backgroundColor: 'rgba(75, 192, 192, 0.2)',
         borderColor: 'rgba(75, 192, 192, 1)',
-        borderWidth: 2
+        borderWidth: 2,
+        tension: 0.4 // Adds curve to the line
       }
     ]
   };
 
   const chartOptions = {
+    responsive: true,
     scales: {
       y: {
         beginAtZero: true,
@@ -38,11 +41,20 @@ const Dashboard = () => {
     plugins: {
       title: {
         display: true,
-        text: 'Weekly Habit Completion'
+        text: 'Weekly Habit Completion',
+        font: {
+          size: 16
+        }
       },
       tooltip: {
         callbacks: {
-          label: (context: any) => `Completion: ${context.parsed.y.toFixed(1)}%`
+          label: (context: any) => {
+            const stat = dailyStats[context.dataIndex];
+            return [
+              `Completion: ${context.parsed.y.toFixed(1)}%`,
+              `Completed: ${stat.completed}/${stat.total} habits`
+            ];
+          }
         }
       }
     }
@@ -78,13 +90,13 @@ const Dashboard = () => {
               <CardContent sx={{ textAlign: 'center' }}>
                 <CheckCircle color="success" sx={{ fontSize: 40 }} />
                 <Typography variant="h5" component="div">
-                  Completion Rate
+                  Today's Progress
                 </Typography>
                 <Typography variant="h3" color="success">
                   {completionRate.toFixed(1)}%
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
-                  habits completed
+                  habits completed today
                 </Typography>
               </CardContent>
             </Card>
@@ -116,6 +128,14 @@ const Dashboard = () => {
             height={400}
           />
         </Paper>
+
+        {habits.length === 0 && (
+          <Box sx={{ textAlign: 'center', mt: 4 }}>
+            <Typography variant="body1" color="text.secondary">
+              No habits added yet. Go to Settings to add some habits!
+            </Typography>
+          </Box>
+        )}
       </Box>
     </Container>
   );

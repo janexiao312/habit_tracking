@@ -3,6 +3,8 @@ import ReactDOM from 'react-dom/client';
 import './index.css';
 import { ThemeProvider, CssBaseline } from '@mui/material';
 import { StyledEngineProvider } from '@mui/material/styles';
+import { Provider } from 'react-redux';
+import store from './store';
 import App from './App';
 import { LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
@@ -15,10 +17,12 @@ const Root = () => {
   const theme = prefersDarkMode ? darkTheme : lightTheme;
 
   return (
-    <ThemeProvider theme={theme}>
-      <CssBaseline />
-      <App />
-    </ThemeProvider>
+    <Provider store={store}>
+      <ThemeProvider theme={theme}>
+        <CssBaseline />
+        <App />
+      </ThemeProvider>
+    </Provider>
   );
 };
 

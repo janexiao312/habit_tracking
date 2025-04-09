@@ -1,7 +1,5 @@
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import { Provider } from 'react-redux';
-import store from './store';
 import Navigation from './components/Navigation';
 import Home from './pages/Home';
 import Dashboard from './pages/Dashboard';
@@ -23,7 +21,6 @@ function App() {
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <div className="App">
-        <Provider store={store}>
           <Router>
             <Navigation />
             <Box sx={{ paddingTop: '40px' }}>
@@ -36,7 +33,6 @@ function App() {
               </Routes>
             </Box>
           </Router>
-        </Provider>
       </div>
     </ThemeProvider>
   );

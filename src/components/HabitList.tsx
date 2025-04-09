@@ -1,34 +1,43 @@
 import React from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store';
-import { toggleHabit } from '../store/habitSlice';
-export {};
-
-interface Habit {
-  id: string;
-  name: string;
-  completed: boolean;
-}
+import { toggleHabit, Habit } from '../store/habitSlice';
+import { Box, Checkbox, FormControlLabel, List, ListItem } from '@mui/material';
+import { format } from 'date-fns';
 
 const HabitList: React.FC = () => {
-  const habits = useSelector((state: RootState) => state.habits.habits as Habit[]);
+  const habits = useSelector((state: RootState) => state.habits.habits);
   const dispatch = useDispatch();
+  const today = format(new Date(), 'yyyy-MM-dd');
+
+  const isHabitCompletedToday = (habit: Habit) => {
+    return habit.completions[today] || false;
+  };
+
+  const handleToggle = (habitId: string) => {
+    dispatch(toggleHabit(habitId, today));
+  };
 
   return (
-    <ul>
-      {habits.map((habit: Habit) => (
-        <li key={habit.id}>
-          <label>
-            <input
-              type="checkbox"
-              checked={habit.completed}
-              onChange={() => dispatch(toggleHabit(habit.id))}
+    <Box sx={{ width: '100%', bgcolor: 'background.paper' }}>
+      <List>
+        {habits.map((habit) => (
+          <ListItem key={habit.id} divider>
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={isHabitCompletedToday(habit)}
+                  onChange={() => handleToggle(habit.id)}
+                  color="primary"
+                />
+              }
+              label={habit.name}
+              sx={{ width: '100%' }}
             />
-            {habit.name}
-          </label>
-        </li>
-      ))}
-    </ul>
+          </ListItem>
+        ))}
+      </List>
+    </Box>
   );
 };
 
