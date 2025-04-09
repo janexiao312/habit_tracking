@@ -5,7 +5,10 @@ import Home from './pages/Home';
 import Dashboard from './pages/Dashboard';
 import Settings from './pages/Settings';
 import DailyTracking from './pages/DailyTracking';
-import WeeklyTracking from './pages/WeeklyTracking'; // Import the new WeeklyTracking page
+import WeeklyTracking from './pages/WeeklyTracking';
+import Login from './pages/Login';
+import Register from './pages/Register';
+import PrivateRoute from './components/PrivateRoute';
 import { ThemeProvider } from '@mui/material/styles';
 import { Box } from '@mui/material';
 import CssBaseline from '@mui/material/CssBaseline';
@@ -21,18 +24,41 @@ function App() {
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <div className="App">
-          <Router>
-            <Navigation />
-            <Box sx={{ paddingTop: '40px' }}>
-              <Routes>
-              <Route path="/" element={<Home />} />
-              <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/settings" element={<Settings />} />
-              <Route path="/daily-tracking" element={<DailyTracking />} />
-              <Route path="/weekly-tracking" element={<WeeklyTracking />} /> {/* New Route */}
-              </Routes>
-            </Box>
-          </Router>
+        <Router>
+          <Navigation />
+          <Box sx={{ paddingTop: '40px' }}>
+            <Routes>
+              <Route path="/login" element={<Login />} />
+              <Route path="/register" element={<Register />} />
+              
+              <Route path="/" element={
+                <PrivateRoute>
+                  <Home />
+                </PrivateRoute>
+              } />
+              <Route path="/dashboard" element={
+                <PrivateRoute>
+                  <Dashboard />
+                </PrivateRoute>
+              } />
+              <Route path="/settings" element={
+                <PrivateRoute>
+                  <Settings />
+                </PrivateRoute>
+              } />
+              <Route path="/daily-tracking" element={
+                <PrivateRoute>
+                  <DailyTracking />
+                </PrivateRoute>
+              } />
+              <Route path="/weekly-tracking" element={
+                <PrivateRoute>
+                  <WeeklyTracking />
+                </PrivateRoute>
+              } />
+            </Routes>
+          </Box>
+        </Router>
       </div>
     </ThemeProvider>
   );

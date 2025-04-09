@@ -1,127 +1,190 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { v4 as uuidv4 } from 'uuid';
-export {};
+import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import axiosInstance from '../utils/axiosConfig';
 
-export interface HabitCompletion {
+export interface HabitEntry {
   date: string;
-  completed: boolean;
+  value: number;
+  note?: string;
 }
 
 export interface Habit {
-  id: string;
+  _id: string;
   name: string;
-  completions: { [date: string]: boolean };  // Store completion status by date
-  date: string;  // Creation date
+  type: 'sleep' | 'water' | 'exercise' | 'break' | 'standing';
+  target: number;
+  unit: string;
+  entries: HabitEntry[];
+  user: string;
 }
 
 interface HabitState {
   habits: Habit[];
+  isLoading: boolean;
+  isError: boolean;
+  isSuccess: boolean;
+  message: string;
 }
-
-const loadHabitsFromStorage = (): Habit[] => {
-  try {
-    const storedHabits = localStorage.getItem('habits');
-    if (!storedHabits) {
-      console.log('No habits found in localStorage');
-      return [];
-    }
-    const parsedHabits = JSON.parse(storedHabits);
-    console.log('Loaded habits from storage:', parsedHabits);
-    if (!Array.isArray(parsedHabits)) {
-      console.log('Stored habits is not an array, returning empty array');
-      return [];
-    }
-    
-    // Ensure all habits have a completions object
-    return parsedHabits.map(habit => ({
-      ...habit,
-      completions: habit.completions || {}
-    }));
-  } catch (error) {
-    console.error('Error loading habits from storage:', error);
-    return [];
-  }
-};
-
-const saveHabitsToStorage = (habits: Habit[]) => {
-  try {
-    if (!Array.isArray(habits)) {
-      console.error('Attempted to save non-array habits:', habits);
-      return;
-    }
-    localStorage.setItem('habits', JSON.stringify(habits));
-    console.log('Successfully saved habits to storage:', habits);
-  } catch (error) {
-    console.error('Error saving habits to storage:', error);
-  }
-};
-
-// Clear any potentially corrupted state
-localStorage.removeItem('habits');
 
 const initialState: HabitState = {
   habits: [],
+  isLoading: false,
+  isError: false,
+  isSuccess: false,
+  message: '',
 };
+
+// Get user habits
+export const getHabits = createAsyncThunk('habits/getAll', async (_, thunkAPI) => {
+  try {
+    const response = await axiosInstance.get('/habits');
+    return response.data;
+  } catch (error: any) {
+    const message = error.response?.data?.message || error.message || error.toString();
+    return thunkAPI.rejectWithValue(message);
+  }
+});
+
+// Create habit
+export const createHabit = createAsyncThunk(
+  'habits/create',
+  async (habitData: Omit<Habit, '_id' | 'user' | 'entries'>, thunkAPI) => {
+    try {
+      const response = await axiosInstance.post('/habits', habitData);
+      return response.data;
+    } catch (error: any) {
+      const message = error.response?.data?.message || error.message || error.toString();
+      return thunkAPI.rejectWithValue(message);
+    }
+  }
+);
+
+// Add habit entry
+export const addHabitEntry = createAsyncThunk(
+  'habits/addEntry',
+  async (
+    {
+      habitId,
+      entryData,
+    }: {
+      habitId: string;
+      entryData: Omit<HabitEntry, 'id'>;
+    },
+    thunkAPI
+  ) => {
+    try {
+      const response = await axiosInstance.post(`/habits/${habitId}/entries`, entryData);
+      return { habitId, habit: response.data };
+    } catch (error: any) {
+      const message = error.response?.data?.message || error.message || error.toString();
+      return thunkAPI.rejectWithValue(message);
+    }
+  }
+);
+
+// Update habit
+export const updateHabit = createAsyncThunk(
+  'habits/update',
+  async (
+    {
+      habitId,
+      habitData,
+    }: {
+      habitId: string;
+      habitData: Partial<Omit<Habit, '_id' | 'user'>>;
+    },
+    thunkAPI
+  ) => {
+    try {
+      const response = await axiosInstance.put(`/habits/${habitId}`, habitData);
+      return response.data;
+    } catch (error: any) {
+      const message = error.response?.data?.message || error.message || error.toString();
+      return thunkAPI.rejectWithValue(message);
+    }
+  }
+);
+
+// Delete habit
+export const deleteHabit = createAsyncThunk(
+  'habits/delete',
+  async (habitId: string, thunkAPI) => {
+    try {
+      await axiosInstance.delete(`/habits/${habitId}`);
+      return habitId;
+    } catch (error: any) {
+      const message = error.response?.data?.message || error.message || error.toString();
+      return thunkAPI.rejectWithValue(message);
+    }
+  }
+);
 
 const habitSlice = createSlice({
   name: 'habits',
   initialState,
   reducers: {
-    logState: (state) => {
-      console.log('Current Redux State:', state.habits);
-      console.log('localStorage State:', localStorage.getItem('habits'));
+    reset: (state) => {
+      state.isLoading = false;
+      state.isSuccess = false;
+      state.isError = false;
+      state.message = '';
     },
-    addHabit: {
-      reducer(state, action: PayloadAction<Habit>) {
-        state.habits.push(action.payload);
-        saveHabitsToStorage(state.habits);
-      },
-      prepare(payload: { name: string }) {
-        return {
-          payload: {
-            id: uuidv4(),
-            name: payload.name,
-            completions: {},
-            date: new Date().toISOString(),
-          },
-        };
-      },
-    },
-    removeHabit: {
-      reducer(state, action: PayloadAction<string>) {
-        console.log('Removing habit with ID:', action.payload);
-        state.habits = state.habits.filter(habit => habit.id !== action.payload);
-        saveHabitsToStorage(state.habits);
-      },
-      prepare(id: string) {
-        return { payload: id };
-      },
-    },
-    reorderHabits: {
-      reducer(state, action: PayloadAction<Habit[]>) {
+  },
+  extraReducers: (builder) => {
+    builder
+      // Get habits
+      .addCase(getHabits.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(getHabits.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.isSuccess = true;
         state.habits = action.payload;
-        saveHabitsToStorage(state.habits);
-      },
-      prepare(habits: Habit[]) {
-        return { payload: habits };
-      },
-    },
-    toggleHabit: {
-      reducer(state, action: PayloadAction<{ id: string, date: string }>) {
-        const { id, date } = action.payload;
-        const habit = state.habits.find(h => h.id === id);
-        if (habit) {
-          // Toggle completion for specific date
-          habit.completions[date] = !habit.completions[date];
-          saveHabitsToStorage(state.habits);
+      })
+      .addCase(getHabits.rejected, (state, action) => {
+        state.isLoading = false;
+        state.isError = true;
+        state.message = action.payload as string;
+      })
+      // Create habit
+      .addCase(createHabit.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(createHabit.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.isSuccess = true;
+        state.habits.push(action.payload);
+      })
+      .addCase(createHabit.rejected, (state, action) => {
+        state.isLoading = false;
+        state.isError = true;
+        state.message = action.payload as string;
+      })
+      // Add entry
+      .addCase(addHabitEntry.fulfilled, (state, action) => {
+        const index = state.habits.findIndex(
+          (habit) => habit._id === action.payload.habitId
+        );
+        if (index !== -1) {
+          state.habits[index] = action.payload.habit;
         }
-      },
-      prepare(id: string, date: string) {
-        return { payload: { id, date } };
-      },
-    },
+      })
+      // Update habit
+      .addCase(updateHabit.fulfilled, (state, action) => {
+        const index = state.habits.findIndex(
+          (habit) => habit._id === action.payload._id
+        );
+        if (index !== -1) {
+          state.habits[index] = action.payload;
+        }
+      })
+      // Delete habit
+      .addCase(deleteHabit.fulfilled, (state, action) => {
+        state.habits = state.habits.filter(
+          (habit) => habit._id !== action.payload
+        );
+      });
   },
 });
 
-export const { addHabit, removeHabit, toggleHabit, reorderHabits, logState } = habitSlice.actions;
+export const { reset } = habitSlice.actions;
 export default habitSlice.reducer;

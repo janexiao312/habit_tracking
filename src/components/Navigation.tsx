@@ -1,5 +1,6 @@
 import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { useSelector, useDispatch } from 'react-redux';
 import { 
   AppBar, 
   Toolbar, 
@@ -8,6 +9,8 @@ import {
   Button,
   useTheme
 } from '@mui/material';
+import { RootState, AppDispatch } from '../store';
+import { logout } from '../store/authSlice';
 import {
   Home as HomeIcon,
   Today as TodayIcon,
@@ -19,17 +22,26 @@ import {
 
 const Navigation = () => {
   const location = useLocation();
+  const navigate = useNavigate();
+  const dispatch = useDispatch<AppDispatch>();
   const theme = useTheme();
+  const { user } = useSelector((state: RootState) => state.auth);
 
   const isActive = (path: string) => location.pathname === path;
 
-  const navItems = [
+  const handleLogout = () => {
+    dispatch(logout());
+    navigate('/login');
+  };
+
+  // Only show these nav items if user is logged in
+  const navItems = user ? [
     { path: '/', label: 'Home', icon: <HomeIcon /> },
     { path: '/daily-tracking', label: 'Daily', icon: <TodayIcon /> },
     { path: '/weekly-tracking', label: 'Weekly', icon: <WeeklyIcon /> },
     { path: '/dashboard', label: 'Dashboard', icon: <DashboardIcon /> },
     { path: '/settings', label: 'Settings', icon: <SettingsIcon /> },
-  ];
+  ] : [];
 
   return (
     <AppBar 
@@ -63,7 +75,7 @@ const Navigation = () => {
         </Box>
 
         {/* Navigation Items */}
-        <Box sx={{ display: 'flex', gap: 1 }}>
+        <Box sx={{ display: 'flex', gap: 1, flexGrow: 1 }}>
           {navItems.map(({ path, label, icon }) => (
             <Button
               key={path}
@@ -91,6 +103,55 @@ const Navigation = () => {
               {label}
             </Button>
           ))}
+        </Box>
+
+        {/* Auth Buttons */}
+        <Box sx={{ display: 'flex', gap: 1 }}>
+          {user ? (
+            <>
+              <Typography sx={{ alignSelf: 'center', mr: 2 }}>
+                Welcome, {user.name}
+              </Typography>
+              <Button
+                onClick={handleLogout}
+                variant="outlined"
+                color="primary"
+                sx={{
+                  borderRadius: '8px',
+                  textTransform: 'none',
+                }}
+              >
+                Logout
+              </Button>
+            </>
+          ) : (
+            <>
+              <Button
+                component={Link}
+                to="/login"
+                variant="outlined"
+                color="primary"
+                sx={{
+                  borderRadius: '8px',
+                  textTransform: 'none',
+                }}
+              >
+                Login
+              </Button>
+              <Button
+                component={Link}
+                to="/register"
+                variant="contained"
+                color="primary"
+                sx={{
+                  borderRadius: '8px',
+                  textTransform: 'none',
+                }}
+              >
+                Register
+              </Button>
+            </>
+          )}
         </Box>
       </Toolbar>
     </AppBar>
